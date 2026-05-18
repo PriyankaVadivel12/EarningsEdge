@@ -7,4 +7,5 @@ data/
 results/temp/
 models/
 wandb/
-.DS_Store
+.DS_Store__pycache__/
+*.pyc

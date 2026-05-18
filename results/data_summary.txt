@@ -1,0 +1,15 @@
+FinancialPhraseBank — Data Summary
+==================================================
+
+Total sentences: 2259
+Train / Val / Test: 1581 / 339 / 339
+
+Class distribution:
+    negative:   303 (13.4%)
+     neutral:  1386 (61.4%)
+    positive:   570 (25.2%)
+
+Majority baseline (always predict 'neutral'): 61.4%
+
+Mean word count: 22.4
+Max word count: 81
