@@ -100,3 +100,63 @@ This sets the bar high for the rest of the project.
 
 ### Files
 - Predictions: `results/baseline_finbert.json`
+
+## FinBERT Error Analysis (8 mistakes, deep dive)
+
+Even with contamination advantage, FinBERT failed 8 of 339 sentences.
+The failures cluster into 4 distinct patterns:
+
+### Pattern 1: Arithmetic reasoning failures (2 errors)
+FinBERT cannot reason about "this number compared to that number."
+
+- "Operating loss was EUR 179mn, compared to a loss of EUR 188mn..." 
+  → True: positive (loss shrank). Predicted: negative.
+- "Operating profit totaled EUR 17.7 mn compared to EUR 17.6 mn..."
+  → True: positive (profit grew). Predicted: negative.
+
+**Insight:** BERT-family models lack arithmetic reasoning. "Loss decreased"
+requires understanding that smaller-of-two-negatives is positive.
+
+### Pattern 2: Semantic inversion failures (1 error)
+Some verbs flip sentiment depending on subject.
+
+- "Unit costs for flight operations fell by 6.4 percent."
+  → True: positive (lower costs = good). Predicted: negative.
+
+**Insight:** "Fell" is overwhelmingly negative in general English. The
+business inversion — falling COSTS being positive — wasn't learned strongly enough.
+
+### Pattern 3: Subtle/jargon positive signals (2 errors)
+FinBERT misses sentiment conveyed via rare domain terms.
+
+- "Previously delivered for LG... now making it commercially available
+  for other mobile terminal vendors..." → True: positive. Predicted: neutral.
+- "However, the broker gave an 'outperform' recommendation."
+  → True: positive. Predicted: negative.
+
+**Insight:** "Outperform" is a strong positive signal in finance but
+appears rarely in general training. "Commercially available" suggests
+business expansion but isn't a typical sentiment cue.
+
+### Pattern 4: Over-positive bias on factual statements (3 errors)
+FinBERT calls neutral statements positive when they contain
+business-positive-sounding words.
+
+- "...government's higher activity in the field of dividend policy."
+  → True: neutral. Predicted: positive.
+- "The new location isn't the only change Wellmont has in store..."
+  → True: neutral. Predicted: positive.
+- "Talvivaara picked BofA Merrill Lynch and JPMorgan as joint 
+  bookrunners..." → True: neutral. Predicted: positive.
+
+**Insight:** Big bank names, large numbers, and "active" verbs trigger
+spurious positivity. This is a learned correlation from training data
+that doesn't generalize properly to descriptive text.
+
+### Implications for Phase 3
+
+When evaluating our fine-tuned DistilBERT, we will specifically check
+performance on these 8 sentences to determine:
+1. Do the same patterns persist (structural problems)?
+2. Does fine-tuning on the train split mitigate any patterns?
+3. Are there NEW failure patterns introduced by our smaller model?
