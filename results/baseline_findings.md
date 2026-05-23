@@ -39,3 +39,64 @@ or fine-tuning.
 
 ### Files
 - Predictions: `results/baseline_vader.json`
+
+
+## Baseline 2: FinBERT (ProsusAI, pre-trained + fine-tuned on financial text)
+
+### Headline Result
+**FinBERT achieved 97.64% accuracy — a 41-point improvement over VADER (56.64%)
+and 36 points over the majority baseline (61.36%).**
+
+### Per-Class Performance
+
+| Class | Precision | Recall | F1 |
+|-------|-----------|--------|-----|
+| Negative | 91.84% | 100.00% | 95.74% |
+| Neutral | 99.51% | 98.56% | 99.03% |
+| Positive | 96.43% | 94.19% | 95.29% |
+
+### Confusion Matrix
+
+|              | Pred Negative | Pred Neutral | Pred Positive |
+|--------------|---------------|--------------|----------------|
+| **True Negative** | 45 | 0 | 0 |
+| **True Neutral**  | 0  | 205 | 3 |
+| **True Positive** | 4  | 1 | 81 |
+
+Only 8 misclassifications out of 339 sentences.
+
+### ⚠️ Important Caveat: Train/Test Contamination
+
+FinBERT was originally fine-tuned on the FinancialPhraseBank dataset (Araci, 2019).
+Our test set is a random 15% split from the same dataset, meaning FinBERT has
+almost certainly seen most of our test sentences during its own training.
+
+This inflates FinBERT's reported performance. The original FinBERT paper reported
+~86% on a held-out FinancialPhraseBank split using 60/20/20 splits. Our 97.64%
+likely reflects significant test-set overlap.
+
+**This is a known limitation of using FinBERT as a benchmark on FinancialPhraseBank.**
+We include it because:
+1. It represents what someone deploying off-the-shelf financial sentiment today
+   would actually use
+2. Our fine-tuned DistilBERT (Phase 3) will train ONLY on our train split, with
+   strict test holdout — making our comparison artificially harder for us, not easier
+
+### Comparison Table
+
+| Model              | Accuracy | F1 (weighted) | F1 (macro) |
+|--------------------|----------|---------------|------------|
+| Majority baseline  | 61.36%   | N/A           | N/A        |
+| VADER              | 56.64%   | 56.85%        | 47.43%     |
+| FinBERT (caveat ⚠️)| 97.64%   | 97.65%        | 96.69%     |
+
+### Key Insight
+The jump from VADER (56.64%) to FinBERT (97.64%) — even with contamination caveats —
+demonstrates the dramatic value of domain-specific pretraining. A model that has
+*read* financial text understands "down 2%" reverses sentiment, and that 
+"received a major order" is positive without explicit positive words.
+
+This sets the bar high for the rest of the project.
+
+### Files
+- Predictions: `results/baseline_finbert.json`
