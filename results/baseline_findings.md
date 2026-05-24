@@ -160,3 +160,69 @@ performance on these 8 sentences to determine:
 1. Do the same patterns persist (structural problems)?
 2. Does fine-tuning on the train split mitigate any patterns?
 3. Are there NEW failure patterns introduced by our smaller model?
+
+## Baseline 3: Llama 3.1 70B via Groq (zero-shot prompting)
+
+### Headline Result
+**Llama 3.1 70B matched FinBERT's accuracy (97.64%) using only zero-shot prompting,
+with NO training on FinancialPhraseBank.**
+
+This is significant because FinBERT had a contamination advantage (it was fine-tuned
+on this dataset), while Llama had no such advantage. The fact that they tied on accuracy
+— and Llama achieved higher F1 macro (97.49% vs 96.69%) — suggests general LLMs can
+substitute for domain-specific fine-tuning on narrow classification tasks.
+
+### Per-Class Performance
+
+| Class | Precision | Recall | F1 |
+|-------|-----------|--------|-----|
+| Negative | 97.78% | 97.78% | 97.78% |
+| Neutral | 99.50% | 96.63% | 98.05% |
+| Positive | 93.48% | 100.00% | 96.63% |
+
+### Confusion Matrix
+
+|              | Pred Negative | Pred Neutral | Pred Positive |
+|--------------|---------------|--------------|----------------|
+| **True Negative** | 44 | 1 | 0 |
+| **True Neutral**  | 1  | 201 | 6 |
+| **True Positive** | 0  | 0 | 86 |
+
+### Llama vs. FinBERT: Critical Differences
+
+| Metric | FinBERT | Llama 3.1 70B | Winner |
+|--------|---------|---------------|--------|
+| Accuracy | 97.64% | 97.64% | Tied |
+| F1 macro | 96.69% | 97.49% | **Llama (+0.80)** |
+| Negative F1 | 95.74% | 97.78% | **Llama (+2.04)** |
+| Positive F1 | 95.29% | 96.63% | **Llama (+1.34)** |
+| Neutral F1 | 99.03% | 98.05% | FinBERT (+0.98) |
+| False negatives on positives | 4 | 0 | **Llama** |
+| Inference cost | ~30ms local | ~2s API | FinBERT (~70x faster) |
+| Training data exposure | Yes (contamination) | No | Cleaner test for Llama |
+
+### Key Findings
+
+1. **General intelligence ≈ domain specialization (on this dataset)**
+   Llama's general training was sufficient to match a domain-specialized model,
+   suggesting modern LLMs encode enough financial knowledge for narrow tasks.
+
+2. **Llama is better at reasoning-heavy cases**
+   The 4 errors FinBERT made where it called positives "negative" (loss decreased,
+   profit grew slightly, costs fell) — Llama got all of these right because it
+   can reason about business context.
+
+3. **The cost trade-off matters**
+   Llama costs ~70x more compute per inference. For high-volume use cases
+   (millions of documents/day), FinBERT-style models are economically necessary.
+   For low-volume + high-accuracy use cases, Llama wins.
+
+4. **Per-class F1 reveals what accuracy hides**
+   Identical accuracy (97.64%) masks meaningful per-class differences.
+   Llama's higher macro F1 indicates more uniform performance across classes —
+   important for imbalanced data where minority classes matter.
+
+### Files
+- Predictions: `results/baseline_llama.json`
+- Raw responses: `results/llama_raw_responses.json`
+- Error analysis: `results/llama_error_analysis.md` 
