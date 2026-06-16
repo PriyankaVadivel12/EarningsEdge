@@ -9,3 +9,4 @@ models/
 wandb/
 .DS_Store__pycache__/
 *.pyc
+models/
