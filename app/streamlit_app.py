@@ -33,11 +33,19 @@ st.set_page_config(
 # =================================================================
 @st.cache_resource
 def load_distilbert():
-    """Load the fine-tuned DistilBERT model."""
+    """Load the fine-tuned DistilBERT model.
+    Tries local path first (for dev), falls back to HF Hub (for deployment).
+    """
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
-    model_dir = PROJECT_ROOT / "models" / "distilbert_finetuned" / "final"
-    model = AutoModelForSequenceClassification.from_pretrained(str(model_dir))
-    tokenizer = AutoTokenizer.from_pretrained(str(model_dir))
+    
+    local_dir = PROJECT_ROOT / "models" / "distilbert_finetuned" / "final"
+    if local_dir.exists():
+        source = str(local_dir)
+    else:
+        source = "PriyankaVadivel/earningsedge-distilbert"
+    
+    model = AutoModelForSequenceClassification.from_pretrained(source)
+    tokenizer = AutoTokenizer.from_pretrained(source)
     model.eval()
     return model, tokenizer
 
