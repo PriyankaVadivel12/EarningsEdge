@@ -176,16 +176,15 @@ streamlit run app/streamlit_app.py
 - **Fine-tuned small models compete with LLMs on narrow tasks.** A 66M DistilBERT trained for 5 minutes on 1,581 sentences is within 1.5 points of Llama 3.1 70B. The gap closes fast when the task is well-scoped.
 - **Architectural limits beat data.** DistilBERT and FinBERT share specific failure modes (arithmetic reasoning, semantic inversion) that aren't solved by more training examples. They're inherent to the BERT architecture.
 - **Different models are complementary, not redundant.** Three approaches with ~97% accuracy and three completely different error patterns — that's the basis of a powerful ensemble.
-- **Library version drift is the real cost of ML deployment.** Half my engineering hours went to API renames, deprecated parameters, and Python 3.13 compatibility issues — not modeling.
+- **Library version drift is the real cost of ML deployment.** Half my engineering hours went to API renames, deprecated parameters, and Python 3.13 compatibility issues - not modeling.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **FinancialPhraseBank** by [Malo et al., 2014](https://arxiv.org/abs/1307.5336) — the labeled dataset that makes this benchmark possible.
 - **FinBERT** by [Araci, 2019](https://huggingface.co/ProsusAI/finbert) — a strong domain-specialized baseline.
 - **Groq** — generous free tier that made Llama 3.1 70B evaluations feasible.
-- **Noorul** — my IEEE research mentor whose guidance on rigorous evaluation shaped how I approached this project.
 
 ---
 
